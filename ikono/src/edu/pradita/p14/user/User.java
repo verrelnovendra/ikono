@@ -1,6 +1,9 @@
 package edu.pradita.p14.user;
 
-public abstract class User {
+import java.util.*;
+import edu.pradita.p14.permission.IPermissible;
+
+public abstract class User implements IPermissible {
 
      String userID;
      String name;
