@@ -1,4 +1,4 @@
-package edu.pradita.p14;
+package edu.pradita.p14.connection;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
