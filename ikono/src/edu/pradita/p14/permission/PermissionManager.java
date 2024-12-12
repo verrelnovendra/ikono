@@ -5,13 +5,19 @@ import java.util.*;
 public class PermissionManager {
     private Map<String, List<String>> permissions;
 
-    public PermissionManager() {
+    private static PermissionManager INSTANCE;
+    
+    
+    private PermissionManager() {
         permissions = new HashMap<>();
     }
-    public PermissionManager(Map<String, List<String>> permissions) {
-        this.permissions = permissions;
-    }
 
+    public static PermissionManager getInstance() {
+        if(INSTANCE == null)
+            INSTANCE = new PermissionManager();
+        return INSTANCE;
+    }
+    
     public Map<String, List<String>> getPermissions() {
         return permissions;
     }
