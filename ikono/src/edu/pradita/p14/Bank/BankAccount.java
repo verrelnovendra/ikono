@@ -1,14 +1,16 @@
+package application;
+
 public class BankAccount {
     private String accountNumber;
     private String bankName;
-    private double balance;
     private String description;
+    private double balance;
 
-    public BankAccount(String accountNumber, String bankName, double balance, String description) {
+    public BankAccount(String accountNumber, String bankName, String description, double balance) {
         this.accountNumber = accountNumber;
         this.bankName = bankName;
-        this.balance = balance;
         this.description = description;
+        this.balance = balance;
     }
 
     public String getAccountNumber() {
@@ -27,10 +29,6 @@ public class BankAccount {
         this.bankName = bankName;
     }
 
-    public double getBalance() {
-        return balance;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -39,16 +37,11 @@ public class BankAccount {
         this.description = description;
     }
 
-    public void deposit(double amount) {
-        this.balance += amount;
+    public double getBalance() {
+        return balance;
     }
 
-    public boolean withdraw(double amount) {
-        if(this.balance >= amount) {
-            this.balance -= amount;
-            return true;
-        }
-
-        return false;
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }
