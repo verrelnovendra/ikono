@@ -1,0 +1,476 @@
+package dokter;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.*;
+import javafx.scene.Scene;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.scene.input.MouseEvent;
+import javafx.geometry.Insets;
+import java.sql.*;
+import javafx.stage.Stage;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
+
+public class DoctorController {
+    private BorderPane root;
+    private TableView<Doctor> tableView;
+    private ObservableList<Doctor> doctorList;
+    private ObservableList<String> specializationList;
+
+    private TextField txtFirstName, txtLastName, txtEmail, txtPhoneNumber;
+    private TextArea txtAddress;
+    private DatePicker dpHireDate;
+    private ComboBox<String> cbSpecialization;
+    private TextField txtSearch;
+
+    public DoctorController() {
+        root = new BorderPane();
+        doctorList = FXCollections.observableArrayList();
+        specializationList = FXCollections.observableArrayList();
+
+        initUI();
+        loadSpecializations();
+        loadDoctors();
+    }
+
+    private void initUI() {
+        
+        tableView = new TableView<>();
+        TableColumn<Doctor, String> colFullName = new TableColumn<>("Nama Lengkap");
+        colFullName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFirstName() + " " + data.getValue().getLastName()));
+
+        TableColumn<Doctor, String> colSpecialization = new TableColumn<>("Spesialisasi");
+        colSpecialization.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getSpecialization()));
+
+        TableColumn<Doctor, String> colEmail = new TableColumn<>("Email");
+        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+        TableColumn<Doctor, String> colPhoneNumber = new TableColumn<>("Telepon");
+        colPhoneNumber.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+        
+        TableColumn<Doctor, String> colAddress = new TableColumn<>("Alamat");
+        colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
+
+       
+        TableColumn<Doctor, String> colHireDate = new TableColumn<>("Tanggal Diterima");
+        colHireDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getHireDate().toString()));
+        
+        tableView.getColumns().addAll(colFullName, colSpecialization, colEmail, colPhoneNumber, colAddress, colHireDate);
+        tableView.setItems(doctorList);
+       
+        tableView.setOnMouseClicked(this::onTableClick);
+
+   
+        txtFirstName = new TextField();
+        txtFirstName.setPromptText("Nama Depan");
+
+        txtLastName = new TextField();
+        txtLastName.setPromptText("Nama Belakang");
+
+        cbSpecialization = new ComboBox<>();
+        cbSpecialization.setPromptText("Pilih Spesialisasi");
+
+        txtEmail = new TextField();
+        txtEmail.setPromptText("Email");
+
+        txtPhoneNumber = new TextField();
+        txtPhoneNumber.setPromptText("Telepon");
+
+        txtAddress = new TextArea();
+        txtAddress.setPromptText("Alamat");
+        txtAddress.setPrefRowCount(3);  
+        
+        TextField txtSearch = new TextField();
+        txtSearch.setPromptText("Cari Nama Dokter");
+
+        dpHireDate = new DatePicker();
+        dpHireDate.setPromptText("Tanggal Diterima");
+
+        Button btnSave = new Button("Simpan");
+        btnSave.setOnAction(e -> tambahDoctor());
+
+        Button btnDelete = new Button("Hapus");
+        btnDelete.setOnAction(e -> hapusDoctor());
+        
+        Button btnSchedule = new Button("Jadwal");
+        btnSchedule.setOnAction(e -> showDoctorSchedule());
+        
+        Button btnSearch = new Button("Cari");
+        btnSearch.setOnAction(e -> cariDokter(txtSearch.getText()));
+
+        Button btnReset = new Button("Reset");
+        btnReset.setOnAction(e -> {
+            txtSearch.clear();
+            loadDoctors();
+        });
+   
+        Button btnShowPatients = new Button("Tampilkan Pasien");
+        btnShowPatients.setOnAction(e -> showPatientData());  
+
+      
+        HBox searchBox = new HBox(10, txtSearch, btnSearch, btnReset, btnShowPatients);
+        searchBox.setPadding(new Insets(10));
+
+        
+        VBox topLayout = new VBox(10, searchBox);
+        root.setTop(topLayout);
+
+        
+        VBox form = new VBox(10, txtFirstName, txtLastName, cbSpecialization, txtEmail, txtPhoneNumber, txtAddress, dpHireDate, btnSave, btnDelete, btnSchedule);
+        form.setPadding(new Insets(10));
+
+        root.setCenter(tableView);
+        root.setRight(form);
+    }
+
+    private void loadDoctors() {
+        doctorList.clear();
+        String query = "SELECT d.doctor_id, d.first_name, d.last_name, s.specialization_name, d.email, d.phone_number, d.address, d.hire_date " +
+                       "FROM doctors d " +
+                       "JOIN specializations s ON d.specialization_id = s.specialization_id";
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dokter", "root", "7005")) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                Doctor doctor = new Doctor(
+                        rs.getInt("doctor_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("specialization_name"),
+                        rs.getString("email"),
+                        rs.getString("phone_number"),
+                        rs.getString("address"),
+                        rs.getDate("hire_date").toLocalDate()
+                );
+                doctorList.add(doctor);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Gagal Memuat Data Dokter");
+            alert.setContentText("Terjadi kesalahan saat mengambil data dokter: " + ex.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    private void loadSpecializations() {
+        specializationList.clear();
+        String query = "SELECT specialization_name FROM specializations";
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dokter", "root", "7005")) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                specializationList.add(rs.getString("specialization_name"));
+            }
+            cbSpecialization.setItems(specializationList);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void tambahDoctor() {
+        if (dpHireDate.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Peringatan");
+            alert.setHeaderText("Tanggal Tidak Valid");
+            alert.setContentText("Silakan pilih tanggal diterima.");
+            alert.showAndWait();
+            return;  
+        }
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dokter", "root", "7005")) {
+            String query = "INSERT INTO doctors (first_name, last_name, specialization_id, email, phone_number, address, hire_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+
+            pstmt.setString(1, txtFirstName.getText());
+            pstmt.setString(2, txtLastName.getText());
+            pstmt.setInt(3, cbSpecialization.getSelectionModel().getSelectedIndex() + 1); 
+            pstmt.setString(4, txtEmail.getText());
+            pstmt.setString(5, txtPhoneNumber.getText());
+            pstmt.setString(6, txtAddress.getText());
+            pstmt.setDate(7, java.sql.Date.valueOf(dpHireDate.getValue()));
+
+            pstmt.executeUpdate();
+            loadDoctors();
+            resetForm();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    private void hapusDoctor() {
+        Doctor selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmationAlert.setTitle("Konfirmasi Hapus");
+            confirmationAlert.setHeaderText("Anda yakin ingin menghapus data dokter ini?");
+            confirmationAlert.setContentText("Nama: " + selected.getFirstName() + " " + selected.getLastName());
+
+            Optional<ButtonType> result = confirmationAlert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dokter", "root", "7005")) {
+                    String query = "DELETE FROM doctors WHERE doctor_id = ?";
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, selected.getDoctorId());
+                    pstmt.executeUpdate();
+                    loadDoctors();
+                    resetForm();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Error");
+                    errorAlert.setHeaderText("Gagal Menghapus Data");
+                    errorAlert.setContentText("Terjadi kesalahan saat menghapus data dokter: " + ex.getMessage());
+                    errorAlert.showAndWait();
+                }
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Peringatan");
+            alert.setHeaderText("Tidak Ada Dokter yang Dipilih");
+            alert.setContentText("Silakan pilih dokter di tabel sebelum menghapus.");
+            alert.showAndWait();
+        }
+    }
+
+    private void resetForm() {
+        txtFirstName.clear();
+        txtLastName.clear();
+        cbSpecialization.getSelectionModel().clearSelection();
+        txtEmail.clear();
+        txtPhoneNumber.clear();
+        txtAddress.clear();
+        dpHireDate.setValue(null);
+        tableView.getSelectionModel().clearSelection();
+    }
+
+    private void onTableClick(MouseEvent event) {
+        Doctor selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            txtFirstName.setText(selected.getFirstName());
+            txtLastName.setText(selected.getLastName());
+            cbSpecialization.setValue(selected.getSpecialization());
+            txtEmail.setText(selected.getEmail());
+            txtPhoneNumber.setText(selected.getPhoneNumber());
+            txtAddress.setText(selected.getAddress());
+            dpHireDate.setValue(selected.getHireDate());
+        }
+    }
+    
+    private void showDoctorSchedule() {
+        Doctor selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+          
+            Stage scheduleStage = new Stage();
+            BorderPane scheduleRoot = new BorderPane();
+            TableView<Schedule> scheduleTable = new TableView<>();
+            ObservableList<Schedule> scheduleList = FXCollections.observableArrayList();
+
+           
+            TableColumn<Schedule, String> colDay = new TableColumn<>("Hari");
+            colDay.setCellValueFactory(new PropertyValueFactory<>("dayOfWeek"));  
+
+            TableColumn<Schedule, String> colStartTime = new TableColumn<>("Jam Mulai");
+            colStartTime.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+
+            TableColumn<Schedule, String> colEndTime = new TableColumn<>("Jam Selesai");
+            colEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+
+            TableColumn<Schedule, String> colLocation = new TableColumn<>("Lokasi");
+            colLocation.setCellValueFactory(new PropertyValueFactory<>("location"));
+
+            TableColumn<Schedule, String> colDescription = new TableColumn<>("Keterangan");
+            colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+           
+            scheduleTable.getColumns().addAll(colDay, colStartTime, colEndTime, colLocation, colDescription);
+            scheduleTable.setItems(scheduleList);
+
+           
+            loadScheduleForDoctor(selected.getDoctorId(), scheduleList);
+
+            
+            scheduleRoot.setCenter(scheduleTable);
+
+            Scene scheduleScene = new Scene(scheduleRoot, 600, 400);
+            scheduleStage.setScene(scheduleScene);
+            scheduleStage.setTitle("Jadwal Praktek Dokter");
+            scheduleStage.show();
+        } else {
+          
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Peringatan");
+            alert.setHeaderText("Pilih Dokter Terlebih Dahulu");
+            alert.setContentText("Silakan pilih dokter di tabel untuk melihat jadwal praktek.");
+            alert.showAndWait();
+        }
+    }
+
+    private void loadScheduleForDoctor(int doctorId, ObservableList<Schedule> scheduleList) {
+       
+        String query = "SELECT hari_praktek, jam_mulai, jam_selesai, keterangan, lokasi_praktek " +
+                       "FROM jadwal_praktek WHERE doctor_id = ?";  
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dokter", "root", "7005")) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, doctorId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                String day = rs.getString("hari_praktek");
+                String startTime = rs.getString("jam_mulai");
+                String endTime = rs.getString("jam_selesai");
+                String description = rs.getString("keterangan");
+                String location = rs.getString("lokasi_praktek");
+
+                scheduleList.add(new Schedule(day, startTime, endTime, description, location));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Gagal Memuat Jadwal");
+            alert.setContentText("Terjadi kesalahan saat mengambil data jadwal dari database.");
+            alert.showAndWait();
+        }
+    }
+    
+    private void cariDokter(String keyword) {
+        doctorList.clear(); 
+        
+        String query = "SELECT d.doctor_id, d.first_name, d.last_name, s.specialization_name, d.email, d.phone_number, d.address, d.hire_date " +
+                       "FROM doctors d " +
+                       "JOIN specializations s ON d.specialization_id = s.specialization_id " +
+                       "WHERE d.first_name LIKE ? OR CONCAT(d.first_name, ' ', d.last_name) LIKE ?"; 
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dokter", "root", "7005")) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+           
+            pstmt.setString(1, "%" + keyword + "%"); 
+            pstmt.setString(2, "%" + keyword + "%"); 
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Doctor doctor = new Doctor(
+                        rs.getInt("doctor_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("specialization_name"),
+                        rs.getString("email"),
+                        rs.getString("phone_number"),
+                        rs.getString("address"),
+                        rs.getDate("hire_date").toLocalDate()
+                );
+                doctorList.add(doctor); 
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Gagal Memuat Data Dokter");
+            alert.setContentText("Terjadi kesalahan saat mengambil data dokter: " + ex.getMessage());
+            alert.showAndWait();
+        }
+        tableView.setItems(doctorList);
+    }
+
+    private void loadPatients(ObservableList<Patient> patientList) {
+        String query = "SELECT id_pasien, nama_lengkap, tanggal_lahir, jenis_kelamin, alamat, nomor_telepon, email, " +
+                       "golongan_darah, status_pernikahan, riwayat_penyakit, alergi, tanggal_registrasi FROM data_pasien";
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/pradita", "root", "12345")) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                Patient patient = new Patient(
+                    rs.getInt("id_pasien"),
+                    rs.getString("nama_lengkap"),
+                    rs.getDate("tanggal_lahir").toLocalDate(),
+                    rs.getString("jenis_kelamin"),
+                    rs.getString("alamat"),
+                    rs.getString("nomor_telepon"),
+                    rs.getString("email"),
+                    rs.getString("golongan_darah"),
+                    rs.getString("status_pernikahan"),
+                    rs.getString("riwayat_penyakit"),
+                    rs.getString("alergi"),
+                    rs.getDate("tanggal_registrasi").toLocalDate()
+                );
+                patientList.add(patient);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Gagal Memuat Data Pasien");
+            alert.setContentText("Terjadi kesalahan saat mengambil data pasien: " + ex.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
+    private void showPatientData() {
+        Stage patientStage = new Stage();
+        BorderPane patientRoot = new BorderPane();
+        TableView<Patient> patientTable = new TableView<>();
+        ObservableList<Patient> patientList = FXCollections.observableArrayList();
+      
+        TableColumn<Patient, String> colNamaLengkap = new TableColumn<>("Nama Lengkap");
+        colNamaLengkap.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNamaLengkap()));
+      
+        TableColumn<Patient, String> colTanggalLahir = new TableColumn<>("Tanggal Lahir");
+        colTanggalLahir.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTanggalLahir().toString()));
+       
+        TableColumn<Patient, String> colJenisKelamin = new TableColumn<>("Jenis Kelamin");
+        colJenisKelamin.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getJenisKelamin()));
+       
+        TableColumn<Patient, String> colAlamat = new TableColumn<>("Alamat");
+        colAlamat.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAlamat()));
+      
+        TableColumn<Patient, String> colNomorTelepon = new TableColumn<>("Nomor Telepon");
+        colNomorTelepon.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNomorTelepon()));
+      
+        TableColumn<Patient, String> colEmail = new TableColumn<>("Email");
+        colEmail.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEmail()));
+
+        TableColumn<Patient, String> colGolonganDarah = new TableColumn<>("Golongan Darah");
+        colGolonganDarah.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getGolonganDarah()));
+
+        TableColumn<Patient, String> colStatusPernikahan = new TableColumn<>("Status Pernikahan");
+        colStatusPernikahan.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStatusPernikahan()));
+       
+        TableColumn<Patient, String> colRiwayatPenyakit = new TableColumn<>("Riwayat Penyakit");
+        colRiwayatPenyakit.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRiwayatPenyakit()));
+      
+        TableColumn<Patient, String> colAlergi = new TableColumn<>("Alergi");
+        colAlergi.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAlergi()));
+
+        TableColumn<Patient, String> colTanggalRegistrasi = new TableColumn<>("Tanggal Registrasi");
+        colTanggalRegistrasi.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTanggalRegistrasi().toString()));
+        
+        patientTable.getColumns().addAll(colNamaLengkap, colTanggalLahir, colJenisKelamin, colAlamat, colNomorTelepon,
+                colEmail, colGolonganDarah, colStatusPernikahan, colRiwayatPenyakit, colAlergi, colTanggalRegistrasi);
+
+        patientTable.setItems(patientList);
+
+       loadPatients(patientList);
+
+        patientRoot.setCenter(patientTable);
+        Scene patientScene = new Scene(patientRoot, 800, 600);
+        patientStage.setScene(patientScene);
+        patientStage.setTitle("Data Pasien");
+        patientStage.show();
+    }
+        public BorderPane getView() {
+        return root;
+    }
