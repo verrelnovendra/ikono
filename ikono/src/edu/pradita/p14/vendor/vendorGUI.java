@@ -1,208 +1,204 @@
-package uas.vendor.gui.p14;
+package vendor.gui.p14;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import vendor.connection.p14.VendorConnection;
+
 import java.sql.*;
-import uas.vendor.p14.DatabaseVendorConnection;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
-public class VendorTableGUI extends JFrame {
-		
-	    private JTable table;
-	    private DefaultTableModel tableModel;
-	    private JTextField idField, nameField, phoneField, addressField, emailField, contactField;
-	    private JButton addButton, deleteButton;
+public class VendorGUI extends Application {
 
-	    public VendorTableGUI() {
-	        setTitle("Vendor Management");
-	        setSize(900, 700);
-	        setDefaultCloseOperation(EXIT_ON_CLOSE);
-	        setLayout(null);
+    private TableView<Vendor> table;
+    private ObservableList<Vendor> vendorList;
+    private TextField nameField, phoneField, addressField, emailField, contactField;
 
-	      
-	        tableModel = new DefaultTableModel(new String[]{"Vendor ID", "Name", "Phone", "Address", "Email", "Contact Person"}, 0);
-	        table = new JTable(tableModel);
-	        JScrollPane scrollPane = new JScrollPane(table);
-	        scrollPane.setBounds(20, 20, 850, 300);
-	        add(scrollPane);
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Vendor Management");
 
-	        JLabel idLabel = new JLabel("Vendor ID:");
-	        idLabel.setBounds(20, 340, 100, 25);
-	        add(idLabel);
+        table = new TableView<>();
+        vendorList = FXCollections.observableArrayList();
 
-	        idField = new JTextField();
-	        idField.setBounds(120, 340, 200, 25);
-	        add(idField);
+        TableColumn<Vendor, String> idColumn = new TableColumn<>("Vendor ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-	        JLabel nameLabel = new JLabel("Name:");
-	        nameLabel.setBounds(20, 380, 100, 25);
-	        add(nameLabel);
+        TableColumn<Vendor, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-	        nameField = new JTextField();
-	        nameField.setBounds(120, 380, 200, 25);
-	        add(nameField);
+        TableColumn<Vendor, String> phoneColumn = new TableColumn<>("Phone");
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
 
-	        JLabel phoneLabel = new JLabel("Phone:");
-	        phoneLabel.setBounds(20, 420, 100, 25);
-	        add(phoneLabel);
+        TableColumn<Vendor, String> addressColumn = new TableColumn<>("Address");
+        addressColumn.setCellValueFactory(new PropertyValueFactory<>("address"));
 
-	        phoneField = new JTextField();
-	        phoneField.setBounds(120, 420, 200, 25);
-	        add(phoneField);
+        TableColumn<Vendor, String> emailColumn = new TableColumn<>("Email");
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-	        JLabel addressLabel = new JLabel("Address:");
-	        addressLabel.setBounds(20, 460, 100, 25);
-	        add(addressLabel);
+        TableColumn<Vendor, String> contactColumn = new TableColumn<>("Contact Person");
+        contactColumn.setCellValueFactory(new PropertyValueFactory<>("contactPerson"));
 
-	        addressField = new JTextField();
-	        addressField.setBounds(120, 460, 200, 25);
-	        add(addressField);
+        table.getColumns().addAll(idColumn, nameColumn, phoneColumn, addressColumn, emailColumn, contactColumn);
+        table.setItems(vendorList);
 
-	        JLabel emailLabel = new JLabel("Email:");
-	        emailLabel.setBounds(350, 340, 100, 25);
-	        add(emailLabel);
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(10));
+        form.setHgap(10);
+        form.setVgap(10);
 
-	        emailField = new JTextField();
-	        emailField.setBounds(450, 340, 200, 25);
-	        add(emailField);
+        nameField = new TextField();
+        phoneField = new TextField();
+        addressField = new TextField();
+        emailField = new TextField();
+        contactField = new TextField();
 
-	        JLabel contactLabel = new JLabel("Contact Person:");
-	        contactLabel.setBounds(350, 380, 120, 25);
-	        add(contactLabel);
+        form.add(new Label("Name:"), 0, 0);
+        form.add(nameField, 1, 0);
+        form.add(new Label("Phone:"), 0, 1);
+        form.add(phoneField, 1, 1);
+        form.add(new Label("Address:"), 0, 2);
+        form.add(addressField, 1, 2);
+        form.add(new Label("Email:"), 2, 0);
+        form.add(emailField, 3, 0);
+        form.add(new Label("Contact Person:"), 2, 1);
+        form.add(contactField, 3, 1);
 
-	        contactField = new JTextField();
-	        contactField.setBounds(450, 380, 200, 25);
-	        add(contactField);
+        Button addButton = new Button("Add Vendor");
+        Button deleteButton = new Button("Delete Vendor");
+        form.add(addButton, 2, 3);
+        form.add(deleteButton, 3, 3);
 
-	        addButton = new JButton("Add Vendor");
-	        addButton.setBounds(350, 420, 150, 25);
-	        add(addButton);
+        VBox layout = new VBox(10, table, form);
+        layout.setPadding(new Insets(10));
 
-	        deleteButton = new JButton("Delete Vendor");
-	        deleteButton.setBounds(350, 460, 150, 25);
-	        add(deleteButton);
+        loadData();
 
-	        
-	        loadData();
+        addButton.setOnAction(e -> addVendor());
+        deleteButton.setOnAction(e -> deleteVendor());
 
+        Scene scene = new Scene(layout, 900, 700);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
 
-	        addButton.addActionListener(new ActionListener() {
-	            @Override
-	            public void actionPerformed(ActionEvent e) {
-	                addVendor();
-	            }
-	        });
+    private void loadData() {
+        try (Connection connection = VendorConnection.getConnection()) {
+            String query = "SELECT vendor_id, name, phone, address, email, contact_person FROM Vendor";
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
 
-	       
-	        deleteButton.addActionListener(new ActionListener() {
-	            @Override
-	            public void actionPerformed(ActionEvent e) {
-	                deleteVendor();
-	            }
-	        });
-	    }
+            vendorList.clear();
 
-	    private void loadData() {
-	        try (Connection connection = DatabaseVendorConnection.getConnection()) {
-	            String query = "SELECT vendor_id, name, phone, address, email, contact_person FROM Vendor";
-	            Statement stmt = connection.createStatement();
-	            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                vendorList.add(new Vendor(
+                        rs.getString("vendor_id"),
+                        rs.getString("name"),
+                        rs.getString("phone"),
+                        rs.getString("address"),
+                        rs.getString("email"),
+                        rs.getString("contact_person")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to load data.");
+        }
+    }
 
-	            
-	            tableModel.setRowCount(0);
+    private void addVendor() {
+        try (Connection connection = VendorConnection.getConnection()) {
+            String query = "INSERT INTO Vendor (name, phone, address, email, contact_person) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = connection.prepareStatement(query);
 
-	          
-	            while (rs.next()) {
-	                tableModel.addRow(new Object[]{
-	                        rs.getInt("vendor_id"),
-	                        rs.getString("name"),
-	                        rs.getString("phone"),
-	                        rs.getString("address"),
-	                        rs.getString("email"),
-	                        rs.getString("contact_person")
-	                });
-	            }
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	            JOptionPane.showMessageDialog(this, "Failed to load data.");
-	        }
-	    }
+            pstmt.setString(1, nameField.getText());
+            pstmt.setString(2, phoneField.getText());
+            pstmt.setString(3, addressField.getText());
+            pstmt.setString(4, emailField.getText());
+            pstmt.setString(5, contactField.getText());
 
-	    private void addVendor() {
-	        try (Connection connection = DatabaseVendorConnection.getConnection()) {
-	            
-	            String query = "INSERT INTO Vendor (name, phone, address, email, contact_person) VALUES (?, ?, ?, ?, ?)";
-	            
-	            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-	                
-	                pstmt.setString(1, nameField.getText());
-	                pstmt.setString(2, phoneField.getText());
-	                pstmt.setString(3, addressField.getText());
-	                pstmt.setString(4, emailField.getText());
-	                pstmt.setString(5, contactField.getText());
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                loadData();
+                showAlert(Alert.AlertType.INFORMATION, "Vendor added successfully.");
+                clearFields();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Failed to add vendor.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to add vendor: " + e.getMessage());
+        }
+    }
 
-	              
-	                int rowsAffected = pstmt.executeUpdate();
+    private void deleteVendor() {
+        Vendor selectedVendor = table.getSelectionModel().getSelectedItem();
+        if (selectedVendor != null) {
+            try (Connection connection = VendorConnection.getConnection()) {
+                String query = "DELETE FROM Vendor WHERE vendor_id = ?";
+                PreparedStatement pstmt = connection.prepareStatement(query);
+                pstmt.setString(1, selectedVendor.getId());
+                pstmt.executeUpdate();
 
-	                if (rowsAffected > 0) {
-	                    
-	                    tableModel.addRow(new Object[]{
-	                            idField.getText(), 
-	                            nameField.getText(),
-	                            phoneField.getText(),
-	                            addressField.getText(),
-	                            emailField.getText(),
-	                            contactField.getText()
-	                    });
+                loadData();
+                showAlert(Alert.AlertType.INFORMATION, "Vendor deleted successfully.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Failed to delete vendor.");
+            }
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Please select a vendor to delete.");
+        }
+    }
 
-	                    JOptionPane.showMessageDialog(this, "Vendor added successfully.");
+    private void clearFields() {
+        nameField.clear();
+        phoneField.clear();
+        addressField.clear();
+        emailField.clear();
+        contactField.clear();
+    }
+    
 
-	                    
-	                    idField.setText("");
-	                    nameField.setText("");
-	                    phoneField.setText("");
-	                    addressField.setText("");
-	                    emailField.setText("");
-	                    contactField.setText("");
-	                } else {
-	                    JOptionPane.showMessageDialog(this, "No rows affected. Vendor not added.");
-	                }
-	            }
-	        } catch (SQLException e) {
-	           
-	            e.printStackTrace();
-	            JOptionPane.showMessageDialog(this, "Failed to add vendor: " + e.getMessage());
-	        }
-	    }
+    private void showAlert(Alert.AlertType alertType, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setContentText(message);
+        alert.show();
+    }
 
+    public static void main(String[] args) {
+        launch(args);
+    }
 
-	    private void deleteVendor() {
-	        int selectedRow = table.getSelectedRow();
-	        if (selectedRow >= 0) {
-	            try (Connection connection = DatabaseVendorConnection.getConnection()) {
-	                String vendorId = tableModel.getValueAt(selectedRow, 0).toString();
-	                String query = "DELETE FROM Vendor WHERE vendor_id = ?";
-	                PreparedStatement pstmt = connection.prepareStatement(query);
-	                pstmt.setInt(1, Integer.parseInt(vendorId));
-	                pstmt.executeUpdate();
+    public static class Vendor {
+        private final SimpleStringProperty id;
+        private final SimpleStringProperty name;
+        private final SimpleStringProperty phone;
+        private final SimpleStringProperty address;
+        private final SimpleStringProperty email;
+        private final SimpleStringProperty contactPerson;
 
-	               
-	                tableModel.removeRow(selectedRow);
-	                JOptionPane.showMessageDialog(this, "Vendor deleted successfully.");
-	            } catch (SQLException e) {
-	                e.printStackTrace();
-	                JOptionPane.showMessageDialog(this, "Failed to delete vendor.");
-	            }
-	        } else {
-	            JOptionPane.showMessageDialog(this, "Please select a vendor to delete.");
-	        }
-	    }
+        public Vendor(String id, String name, String phone, String address, String email, String contactPerson) {
+            this.id = new SimpleStringProperty(id);
+            this.name = new SimpleStringProperty(name);
+            this.phone = new SimpleStringProperty(phone);
+            this.address = new SimpleStringProperty(address);
+            this.email = new SimpleStringProperty(email);
+            this.contactPerson = new SimpleStringProperty(contactPerson);
+        }
 
-	    public static void main(String[] args) {
-	        SwingUtilities.invokeLater(() -> new VendorTableGUI().setVisible(true));
-	    }
-	}
+        public String getId() { return id.get(); }
+        public String getName() { return name.get(); }
+        public String getPhone() { return phone.get(); }
+        public String getAddress() { return address.get(); }
+        public String getEmail() { return email.get(); }
+        public String getContactPerson() { return contactPerson.get(); }
+    }    
+}
