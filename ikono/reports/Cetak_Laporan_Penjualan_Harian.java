@@ -1,4 +1,4 @@
-package application;
+package edu.pradita.p14.user;
 
 import javafx.application.Application;
 import javafx.beans.property.SimpleDoubleProperty;
