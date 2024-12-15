@@ -1,0 +1,84 @@
+package edu.pradita.p14.connectionprinter;
+
+import javafx.application.Application;
+import javafx.print.Printer;
+import javafx.print.PrinterJob;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class PrinterConnectionApp extends Application {
+
+    private Printer selectedPrinter;  
+
+    @Override
+    public void start(Stage primaryStage) {
+        // ChoiceBox untuk menampilkan daftar printer
+        ChoiceBox<Printer> printerChoiceBox = new ChoiceBox<>();
+        printerChoiceBox.getItems().addAll(Printer.getAllPrinters());
+        printerChoiceBox.setValue(Printer.getDefaultPrinter());
+
+        // Tombol untuk mengonfirmasi koneksi printer
+        Button connectPrinterButton = new Button("Connect to Printer");
+        connectPrinterButton.setOnAction(e -> {
+            selectedPrinter = printerChoiceBox.getValue();  // Ambil printer yang dipilih
+            if (selectedPrinter != null) {
+                showAlert("Printer Connected", "Connected to: " + selectedPrinter.getName());
+            } else {
+                showAlert("Error", "No printer selected. Please choose a printer.");
+            }
+        });
+
+        // Tombol untuk mencetak halaman kosong
+        Button printButton = new Button("Print Test Page");
+        printButton.setOnAction(e -> printTestPage());  
+
+        // Layout
+        VBox root = new VBox(15);
+        root.getChildren().addAll(printerChoiceBox, connectPrinterButton, printButton);
+
+        // Scene
+        Scene scene = new Scene(root, 400, 200);
+        primaryStage.setTitle("Printer Connection GUI");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    // Fungsi untuk mencetak halaman test
+    private void printTestPage() {
+        if (selectedPrinter != null) {
+            showAlert("Printer Connected", "Connected to: " + selectedPrinter.getName());
+
+            PrinterJob printerJob = PrinterJob.createPrinterJob(selectedPrinter);
+            if (printerJob != null && printerJob.showPrintDialog(null)) {
+                boolean success = printerJob.printPage(new VBox());
+                if (success) {
+                    printerJob.endJob();
+                    showAlert("Print Success", "Test page printed successfully.");
+                } else {
+                    showAlert("Print Failed", "Failed to print test page.");
+                }
+            } else {
+                showAlert("Error", "Failed to create printer job.");
+            }
+        } else {
+            showAlert("Error", "No printer selected. Please choose a printer.");
+        }
+    }
+
+    // Fungsi untuk menampilkan alert
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
