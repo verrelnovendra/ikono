@@ -163,7 +163,7 @@ public class PenjualanBulanan extends Application {
 
     private Connection connect() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/dummy", "root", "mysql");
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/transaction", "root", "");
         } catch (Exception e) {
             e.printStackTrace();
             return null;
