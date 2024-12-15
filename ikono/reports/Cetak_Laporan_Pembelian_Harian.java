@@ -126,7 +126,7 @@ public class Cetak_Laporan_Pembelian_Harian extends Application {
 
     private Connection connect() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/transaksi", "root", "MIKONXD88g.");
+            return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/transaksi", "root", "");
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal terhubung ke database.");
