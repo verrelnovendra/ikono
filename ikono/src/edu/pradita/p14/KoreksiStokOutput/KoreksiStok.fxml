@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+
+<AnchorPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="KoreksiStokOutput.KoreksiStokController">
+    <children>
+        <ComboBox fx:id="cmbBarang" layoutX="25.0" layoutY="25.0" prefWidth="150.0" promptText="Pilih Barang" />
+        <Label fx:id="lblNamaBarang" layoutX="25.0" layoutY="60.0" text="Nama Barang: " />
+        <Label fx:id="lblStokSaatIni" layoutX="25.0" layoutY="85.0" text="Stok Saat Ini: " />
+        <Label fx:id="lblSatuan" layoutX="25.0" layoutY="110.0" text="Satuan: " />
+        <TextField fx:id="txtJumlahKoreksi" layoutX="25.0" layoutY="145.0" promptText="Jumlah Koreksi" />
+        <Button fx:id="btnKoreksi" layoutX="25.0" layoutY="180.0" text="Koreksi Stok" />
+    </children>
+</AnchorPane>
