@@ -30,7 +30,7 @@ public class PelunasanPiutangApp extends Application {
         	Alert alert = new Alert(AlertType.ERROR);
         	alert.setTitle("Error: ");
         	alert.setHeaderText("Koneksi SQL gagal.");
-        	alert.setContentText("Tolong ubah DB_URL, DB_USER, dan DB_PASSWORD di class PelunasanPiutang dan pastikan bahwa koneksi tersebut aktif.");
+        	alert.setContentText("Tolong ubah DB_URL, DB_USER, dan DB_PASSWORD di class PelunasanPiutangApp dan pastikan bahwa koneksi tersebut aktif.");
         	alert.setHeight(200);;
         	e.printStackTrace();
         	alert.showAndWait();
