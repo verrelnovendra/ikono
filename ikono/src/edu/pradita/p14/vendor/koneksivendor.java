@@ -1,12 +1,13 @@
-package uas.vendor.p14;
+package vendor.connection.p14;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DatabaseVendorConnection {
+public class VendorConnection {
 	private static final String URL = "jdbc:mysql://localhost:3306/vendor"; 
     private static final String USER = "root"; 
-    private static final String PASSWORD = ""; //
+    private static final String PASSWORD = "liamsql14090668";
 
     public static Connection getConnection() {
         Connection connection = null;
