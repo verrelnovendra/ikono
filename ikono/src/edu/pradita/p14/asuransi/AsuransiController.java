@@ -79,19 +79,15 @@ public class AsuransiController {
             }
         });
 
-        // Event handler for buttons
         btnBatal.setOnAction(event -> {
-            // Handle Batal button action
             closeWindow();
         });
 
         btnContinue.setOnAction(event -> {
-            // Handle Lanjut Tanpa Asuransi button action
             closeWindow();
         });
 
         btnKonfirm.setOnAction(event -> {
-            // Handle Konfirmasi button action
             konfirmasiAsuransi();
         });
     }
@@ -182,7 +178,6 @@ public class AsuransiController {
     }
 
     private String generateIdPremi() {
-        // Generate a unique ID for the premium
         return "P" + System.currentTimeMillis();
     }
 
@@ -192,9 +187,9 @@ public class AsuransiController {
     }
 
     private Connection getDatabaseConnection() throws SQLException {
-        String url = "jdbc:mysql://localhost:3306/pradita";
-        String user = "root";
-        String password = "password";
+        String url = "jdbc:mysql://0.tcp.ap.ngrok.io:10570/pradita ";
+        String user = "jaki";
+        String password = "jaki123Z!";
         return DriverManager.getConnection(url, user, password);
     }
 
@@ -211,7 +206,6 @@ public class AsuransiController {
             this.deskripsi = deskripsi;
         }
 
-        // Getters and Setters
         public String getKodeAsuransi() {
             return kodeAsuransi;
         }
