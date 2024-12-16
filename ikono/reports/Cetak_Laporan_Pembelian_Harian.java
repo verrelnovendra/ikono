@@ -26,11 +26,9 @@ public class Cetak_Laporan_Pembelian_Harian extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Root container
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
 
-        // Top layout (DatePicker and Button)
         HBox topLayout = new HBox(10);
         topLayout.setAlignment(Pos.CENTER);
         HBox.setHgrow(topLayout, Priority.ALWAYS);
@@ -43,12 +41,10 @@ public class Cetak_Laporan_Pembelian_Harian extends Application {
         topLayout.getChildren().addAll(dateLabel, datePicker, loadButton);
         root.setTop(topLayout);
 
-        // Table for report
         reportTable = new TableView<>();
         purchaseReports = FXCollections.observableArrayList();
         reportTable.setItems(purchaseReports);
 
-        // Columns for report
         addColumnToTable("Tanggal", "date", 100);
         addColumnToTable("Nomor Pembelian", "orderNo", 150);
         addColumnToTable("Nama Supplier", "supplier", 150);
@@ -58,10 +54,8 @@ public class Cetak_Laporan_Pembelian_Harian extends Application {
         addColumnToTable("Total Harga", "totalPrice", 120);
         addColumnToTable("Status Pembayaran", "paymentStatus", 150);
 
-        // Set the report table to the center of root layout
         root.setCenter(reportTable);
 
-        // Scene and stage setup
         Scene scene = new Scene(root, 1000, 600);
         primaryStage.setTitle("Laporan Pembelian Harian");
         primaryStage.setScene(scene);
