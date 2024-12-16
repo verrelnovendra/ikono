@@ -21,7 +21,7 @@
           <TableColumn fx:id="colDeskripsi" prefWidth="148.0" text="Deskripsi" />
         </columns>
       </TableView>
-      <Label layoutX="220.0" layoutY="24.0" text="Form Asuransi Karyawan">
+      <Label layoutX="220.0" layoutY="24.0" text="Form Asuransi">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
@@ -32,14 +32,14 @@
       <TextField fx:id="textGetKodeAsuransi" editable="false" layoutX="146.0" layoutY="203.0" prefHeight="26.0" prefWidth="199.0" />
       <TextField fx:id="textGetNamaAsuransi" editable="false" layoutX="146.0" layoutY="232.0" prefHeight="26.0" prefWidth="199.0" />
       <TextField fx:id="textGetHargaAsuransi" editable="false" layoutX="146.0" layoutY="262.0" prefHeight="26.0" prefWidth="199.0" />
-      <Label layoutX="32.0" layoutY="320.0" text="Id Karyawan" />
-      <Label layoutX="32.0" layoutY="351.0" text="Nama Karyawan" />
-      <Label layoutX="32.0" layoutY="381.0" text="Jabatan" />
+      <Label layoutX="32.0" layoutY="320.0" text="ID Pelanggan" />
+      <Label layoutX="32.0" layoutY="351.0" text="Nama Pelanggan" />
+      <Label layoutX="32.0" layoutY="381.0" text="Status" />
       <ComboBox fx:id="comboIdKaryawan" layoutX="146.0" layoutY="316.0" prefHeight="26.0" prefWidth="199.0" />
       <TextField fx:id="textGetNamaKaryawan" editable="false" layoutX="146.0" layoutY="347.0" prefHeight="26.0" prefWidth="199.0" />
       <TextField fx:id="textGetJabatan" layoutX="146.0" layoutY="377.0" prefHeight="26.0" prefWidth="199.0" />
       <ComboBox fx:id="comboSiklus" layoutX="145.0" layoutY="409.0" prefHeight="26.0" prefWidth="199.0" />
       <Label layoutX="32.0" layoutY="413.0" text="Siklus Tagihan" />
-      <Button fx:id="btnKonfirm" layoutX="195.0" layoutY="456.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="154.0" text="Konfirmasi" />
+      <Button fx:id="btnKonfirm" layoutX="172.0" layoutY="454.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="154.0" text="Konfirmasi" />
    </children>
 </Pane>
