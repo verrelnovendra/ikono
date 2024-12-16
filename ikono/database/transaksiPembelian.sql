@@ -1,3 +1,26 @@
+CREATE TABLE Products (
+    ProductID INT AUTO_INCREMENT PRIMARY KEY,
+    ProductName VARCHAR(100),
+    Category VARCHAR(50),
+    Stock INT,
+    UnitPrice DECIMAL(10, 2)
+);
+
+
+CREATE TABLE vendor (
+  vendor_id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL,
+  contact_person VARCHAR(100) NOT NULL DEFAULT 'Unknown',
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(15) NOT NULL DEFAULT 'Unknown',
+  address TINYTEXT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (vendor_id),
+  UNIQUE INDEX name_UNIQUE (name ASC) VISIBLE,
+  UNIQUE INDEX email_UNIQUE (email ASC) VISIBLE
+);
+
 CREATE TABLE PurchaseTransactions (
     PurchaseID INT AUTO_INCREMENT PRIMARY KEY,
     PurchaseDate DATE,
