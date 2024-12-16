@@ -1,199 +1,207 @@
-package transaksiPembelian;
+import java.awt.Button;
+import java.awt.Label;
+import java.awt.TextField;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PurchaseManagementApp extends Application {
+import javax.swing.table.TableColumn;
 
-    // ObservableLists for table data
-    private final ObservableList<PurchaseTransaction> transactions = FXCollections.observableArrayList();
+public class transaksiPembelian extends Application {
+
+    // TableView untuk menampilkan data
+    private TableView<PurchaseTransactionWithDetails> table;
+    private ObservableList<PurchaseTransactionWithDetails> data;
+
+    // Input Fields
+    private TextField purchaseDateField, totalAmountField, paymentStatusField, paymentMethodField, vendorIDField;
+    private TextField productIDField, quantityField, unitPriceField, subtotalField;
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("Purchase Management System");
+    public void start(Stage stage) {
+        // Inisialisasi TableView
+        table = new TableView<>();
+        data = FXCollections.observableArrayList();
+        table.setItems(data);
 
-        // Tabs for transactions
-        TabPane tabPane = new TabPane();
-        tabPane.getTabs().add(createTransactionsTab());
+        // Kolom untuk PurchaseTransaction
+        TableColumn<PurchaseTransactionWithDetails, Integer> purchaseIDColumn = new TableColumn<>("Purchase ID");
+        purchaseIDColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getPurchaseID()).asObject());
 
-        Scene scene = new Scene(tabPane, 800, 600);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        TableColumn<PurchaseTransactionWithDetails, String> purchaseDateColumn = new TableColumn<>("Purchase Date");
+        purchaseDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPurchaseDate()));
 
-        // Load data from the database
-        loadTransactionsFromDatabase();
+        TableColumn<PurchaseTransactionWithDetails, Double> totalAmountColumn = new TableColumn<>("Total Amount");
+        totalAmountColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getTotalAmount()).asObject());
+
+        TableColumn<PurchaseTransactionWithDetails, String> paymentStatusColumn = new TableColumn<>("Payment Status");
+        paymentStatusColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPaymentStatus()));
+
+        TableColumn<PurchaseTransactionWithDetails, String> paymentMethodColumn = new TableColumn<>("Payment Method");
+        paymentMethodColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPaymentMethod()));
+
+        // Kolom untuk PurchaseDetail
+        TableColumn<PurchaseTransactionWithDetails, Integer> vendorIDColumn = new TableColumn<>("Vendor ID");
+        vendorIDColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getVendorID()).asObject());
+
+        TableColumn<PurchaseTransactionWithDetails, Integer> productIDColumn = new TableColumn<>("Product ID");
+        productIDColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getProductID()).asObject());
+
+        TableColumn<PurchaseTransactionWithDetails, Integer> quantityColumn = new TableColumn<>("Quantity");
+        quantityColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getQuantity()).asObject());
+
+        TableColumn<PurchaseTransactionWithDetails, Double> unitPriceColumn = new TableColumn<>("Unit Price");
+        unitPriceColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getUnitPrice()).asObject());
+
+        TableColumn<PurchaseTransactionWithDetails, Double> subtotalColumn = new TableColumn<>("Subtotal");
+        subtotalColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getSubtotal()).asObject());
+
+        // Menambahkan kolom ke TableView
+        table.getColumns().addAll(purchaseIDColumn, purchaseDateColumn, totalAmountColumn, paymentStatusColumn, 
+                                  paymentMethodColumn, vendorIDColumn, productIDColumn, quantityColumn, 
+                                  unitPriceColumn, subtotalColumn);
+
+        // Input Fields untuk PurchaseTransaction dan PurchaseDetail
+        purchaseDateField = new TextField();
+        totalAmountField = new TextField();
+        paymentStatusField = new TextField();
+        paymentMethodField = new TextField();
+        vendorIDField = new TextField();
+
+        productIDField = new TextField();
+        quantityField = new TextField();
+        unitPriceField = new TextField();
+        subtotalField = new TextField();
+
+        // Tombol untuk menambah data
+        Button addButton = new Button("Add Purchase Transaction");
+        addButton.setOnAction(e -> addTransactionWithDetails());
+
+        // Layout untuk tampilan GUI
+        VBox vbox = new VBox(10);
+        vbox.getChildren().addAll(table, 
+                                  new Label("Purchase Date:"), purchaseDateField, 
+                                  new Label("Total Amount:"), totalAmountField,
+                                  new Label("Payment Status:"), paymentStatusField, 
+                                  new Label("Payment Method:"), paymentMethodField,
+                                  new Label("Vendor ID:"), vendorIDField,
+                                  new Label("Product ID:"), productIDField, 
+                                  new Label("Quantity:"), quantityField,
+                                  new Label("Unit Price:"), unitPriceField,
+                                  new Label("Subtotal:"), subtotalField,
+                                  addButton);
+
+        // Scene dan Stage
+        Scene scene = new Scene(vbox, 800, 600);
+        stage.setTitle("Purchase Transactions with Details");
+        stage.setScene(scene);
+        stage.show();
+
+        // Load data dari database ke TableView
+        loadData();
     }
 
-    private Tab createTransactionsTab() {
-        TableView<PurchaseTransaction> table = new TableView<>(transactions);
+    // Mengambil data dari database dan menambahkannya ke TableView
+    private void loadData() {
+        String sql = "SELECT pt.PurchaseID, pt.PurchaseDate, pt.TotalAmount, pt.PaymentStatus, pt.PaymentMethod, pt.vendor_id, " +
+                     "pd.PurchaseDetailID, pd.ProductID, pd.Quantity, pd.UnitPrice, pd.Subtotal " +
+                     "FROM PurchaseTransactions pt " +
+                     "JOIN PurchaseDetails pd ON pt.PurchaseID = pd.PurchaseID";
 
-        TableColumn<PurchaseTransaction, Integer> idColumn = new TableColumn<>("Transaction ID");
-        idColumn.setCellValueFactory(cellData -> cellData.getValue().transactionIdProperty().asObject());
-
-        TableColumn<PurchaseTransaction, String> dateColumn = new TableColumn<>("Date");
-        dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-
-        TableColumn<PurchaseTransaction, Double> totalColumn = new TableColumn<>("Total Amount");
-        totalColumn.setCellValueFactory(cellData -> cellData.getValue().totalAmountProperty().asObject());
-
-        table.getColumns().addAll(idColumn, dateColumn, totalColumn);
-
-        VBox form = createTransactionForm();
-
-        VBox layout = new VBox(10, table, form);
-        layout.setPadding(new Insets(10));
-
-        return new Tab("Transactions", layout);
-    }
-
-    private VBox createTransactionForm() {
-        TextField transactionIdField = new TextField();
-        transactionIdField.setPromptText("Transaction ID");
-
-        TextField dateField = new TextField();
-        dateField.setPromptText("Date (YYYY-MM-DD)");
-
-        TextField totalField = new TextField();
-        totalField.setPromptText("Total Amount");
-
-        Button addButton = new Button("Add Transaction");
-        addButton.setOnAction(e -> {
-            try {
-                int transactionId = Integer.parseInt(transactionIdField.getText());
-                String date = dateField.getText();
-                double totalAmount = Double.parseDouble(totalField.getText());
-
-                PurchaseTransaction transaction = new PurchaseTransaction(transactionId, date, totalAmount);
-
-                // Add to the database and ObservableList
-                addTransactionToDatabase(transaction);
-                transactions.add(transaction);
-
-                transactionIdField.clear();
-                dateField.clear();
-                totalField.clear();
-            } catch (NumberFormatException ex) {
-                showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please enter valid numbers for Transaction ID and Total Amount.");
-            }
-        });
-
-        VBox form = new VBox(5, transactionIdField, dateField, totalField, addButton);
-        return form;
-    }
-
-    private void loadTransactionsFromDatabase() {
-        String query = "SELECT * FROM transactions";
-
-        try (Connection conn = MySQLConnection.getConnection();
+        try (Connection conn = DatabaseConnection.connect();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                transactions.add(new PurchaseTransaction(
-                        rs.getInt("transaction_id"),
-                        rs.getString("date"),
-                        rs.getDouble("total_amount")
-                ));
-            }
+                int purchaseID = rs.getInt("PurchaseID");
+                String purchaseDate = rs.getString("PurchaseDate");
+                double totalAmount = rs.getDouble("TotalAmount");
+                String paymentStatus = rs.getString("PaymentStatus");
+                String paymentMethod = rs.getString("PaymentMethod");
+                int vendorID = rs.getInt("vendor_id");
 
+                int purchaseDetailID = rs.getInt("PurchaseDetailID");
+                int productID = rs.getInt("ProductID");
+                int quantity = rs.getInt("Quantity");
+                double unitPrice = rs.getDouble("UnitPrice");
+                double subtotal = rs.getDouble("Subtotal");
+
+                // Menambahkan data ke ObservableList
+                data.add(new PurchaseTransactionWithDetails(purchaseID, purchaseDate, totalAmount, paymentStatus,
+                        paymentMethod, vendorID, purchaseDetailID, productID, quantity, unitPrice, subtotal));
+            }
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to load transactions: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void addTransactionToDatabase(PurchaseTransaction transaction) {
-        String query = "INSERT INTO transactions (transaction_id, date, total_amount) VALUES (?, ?, ?)";
+    // Menambahkan data transaksi pembelian dan detail ke database
+    private void addTransactionWithDetails() {
+        String purchaseDate = purchaseDateField.getText();
+        double totalAmount = Double.parseDouble(totalAmountField.getText());
+        String paymentStatus = paymentStatusField.getText();
+        String paymentMethod = paymentMethodField.getText();
+        int vendorID = Integer.parseInt(vendorIDField.getText());
 
-        try (Connection conn = MySQLConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        int productID = Integer.parseInt(productIDField.getText());
+        int quantity = Integer.parseInt(quantityField.getText());
+        double unitPrice = Double.parseDouble(unitPriceField.getText());
+        double subtotal = Double.parseDouble(subtotalField.getText());
 
-            stmt.setInt(1, transaction.getTransactionId());
-            stmt.setString(2, transaction.getDate());
-            stmt.setDouble(3, transaction.getTotalAmount());
+        // Insert PurchaseTransaction
+        String insertPurchaseTransaction = "INSERT INTO PurchaseTransactions (PurchaseDate, TotalAmount, PaymentStatus, PaymentMethod, vendor_id) " +
+                                           "VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(insertPurchaseTransaction, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, purchaseDate);
+            stmt.setDouble(2, totalAmount);
+            stmt.setString(3, paymentStatus);
+            stmt.setString(4, paymentMethod);
+            stmt.setInt(5, vendorID);
             stmt.executeUpdate();
 
+            // Get the generated PurchaseID
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                int purchaseID = rs.getInt(1);
+
+                // Insert PurchaseDetails
+                String insertPurchaseDetails = "INSERT INTO PurchaseDetails (PurchaseID, ProductID, Quantity, UnitPrice, Subtotal) " +
+                                               "VALUES (?, ?, ?, ?, ?)";
+                try (PreparedStatement stmtDetail = conn.prepareStatement(insertPurchaseDetails)) {
+                    stmtDetail.setInt(1, purchaseID);
+                    stmtDetail.setInt(2, productID);
+                    stmtDetail.setInt(3, quantity);
+                    stmtDetail.setDouble(4, unitPrice);
+                    stmtDetail.setDouble(5, subtotal);
+                    stmtDetail.executeUpdate();
+
+                    // Reload data
+                    data.clear();
+                    loadData();
+                }
+
+            }
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to add transaction: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 }
-
-class MySQLConnection {
-    public static Connection getConnection() {
-        String url = "jdbc:mysql://localhost:3306/transaksi";
-        String username = "root";
-        String password = "Scythia89.";
-
-        try {
-            // Make sure you're using a MySQL Connector/J version compatible with JDK 17
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            return DriverManager.getConnection(url, username, password);
-        } catch (ClassNotFoundException e) {
-            System.out.println("MySQL JDBC Driver not found: " + e.getMessage());
-        } catch (SQLException e) {
-            System.out.println("Database connection failed: " + e.getMessage());
-        }
-        return null;
-    }
-}
-
-class PurchaseTransaction {
-    private final IntegerProperty transactionId = new SimpleIntegerProperty();
-    private final StringProperty date = new SimpleStringProperty();
-    private final DoubleProperty totalAmount = new SimpleDoubleProperty();
-
-    public PurchaseTransaction(int transactionId, String date, double totalAmount) {
-        this.transactionId.set(transactionId);
-        this.date.set(date);
-        this.totalAmount.set(totalAmount);
-    }
-
-    public IntegerProperty transactionIdProperty() {
-        return transactionId;
-    }
-
-    public StringProperty dateProperty() {
-        return date;
-    }
-
-    public DoubleProperty totalAmountProperty() {
-        return totalAmount;
-    }
-
-    public int getTransactionId() {
-        return transactionId.get();
-    }
-
-    public String getDate() {
-        return date.get();
-    }
-
-    public double getTotalAmount() {
-        return totalAmount.get();
-    }
-}
+    
