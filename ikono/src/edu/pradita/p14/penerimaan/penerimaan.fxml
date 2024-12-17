@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="595.0" prefWidth="899.0" xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.pradita.uas.Penerimaan">
+   <children>
+      <Label layoutX="16.0" layoutY="39.0" text="No. Penerimaan" />
+      <ComboBox fx:id="comboKodeSupplier" layoutX="122.0" layoutY="69.0" prefHeight="26.0" prefWidth="161.0" />
+      <Label layoutX="16.0" layoutY="73.0" text="Kode Supplier" />
+      <Label layoutX="16.0" layoutY="107.0" text="Nama" />
+      <TextField fx:id="textNamaSupplier" editable="false" layoutX="122.0" layoutY="102.0" />
+      <Label layoutX="16.0" layoutY="136.0" text="Alamat" />
+      <Label layoutX="15.0" layoutY="168.0" text="Telepon" />
+      <TextField fx:id="textAlamatSupplier" editable="false" layoutX="122.0" layoutY="131.0" />
+      <TextField fx:id="textTeleponSupplier" editable="false" layoutX="122.0" layoutY="164.0" />
+      <TextField fx:id="textCariBarang" layoutX="16.0" layoutY="238.0" prefHeight="26.0" prefWidth="141.0" promptText="Ex. &quot;Laptop&quot;" />
+      <Button fx:id="btnCari" layoutX="164.0" layoutY="238.0" mnemonicParsing="false" onAction="#handleCariClick" prefHeight="25.0" prefWidth="57.0" text="Cari" />
+      <Label layoutX="243.0" layoutY="242.0" text="Kode" />
+      <TextField fx:id="textKodeBarang" editable="false" layoutX="284.0" layoutY="238.0" prefHeight="25.0" prefWidth="74.0" />
+      <Label layoutX="368.0" layoutY="242.0" text="Nama" />
+      <TextField fx:id="textNamaBarang" editable="false" layoutX="416.0" layoutY="238.0" prefHeight="26.0" prefWidth="150.0" />
+      <Label layoutX="579.0" layoutY="242.0" text="Jumlah" />
+      <TextField fx:id="textJumlahBarang" layoutX="631.0" layoutY="238.0" prefHeight="10.0" prefWidth="74.0" promptText="1-999" />
+      <Label layoutX="297.0" layoutY="162.0" prefHeight="25.0" prefWidth="105.0" text="Admin">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="comboAdmin" layoutX="362.0" layoutY="161.0" prefWidth="150.0" />
+      <ListView fx:id="listItems" layoutX="16.0" layoutY="281.0" onMouseClicked="#handleListClick" prefHeight="200.0" prefWidth="208.0" />
+      <TableView fx:id="tableBarang" layoutX="243.0" layoutY="281.0" prefHeight="200.0" prefWidth="619.0">
+        <columns>
+          <TableColumn fx:id="colKode" prefWidth="132.0" text="Kode" />
+          <TableColumn fx:id="colNama" prefWidth="370.0" text="Nama Barang" />
+            <TableColumn fx:id="colJumlah" prefWidth="116.0" text="Jumlah" />
+        </columns>
+      </TableView>
+      <Button fx:id="btnSimpan" layoutX="23.0" layoutY="534.0" mnemonicParsing="false" onAction="#handleSimpanClick" prefHeight="38.0" prefWidth="134.0" text="SIMPAN" />
+      <Button fx:id="btnBatal" layoutX="176.0" layoutY="534.0" mnemonicParsing="false" onAction="#handleBatalClick" prefHeight="38.0" prefWidth="134.0" text="BATAL" />
+      <Button fx:id="btnTutup" layoutX="338.0" layoutY="534.0" mnemonicParsing="false" onAction="#handleTutupClick" prefHeight="38.0" prefWidth="134.0" text="TUTUP" />
+      <Label layoutX="558.0" layoutY="545.0" prefHeight="17.0" prefWidth="74.0" text="ITEM" />
+      <TextField fx:id="textTotalItems" editable="false" layoutX="600.0" layoutY="541.0" />
+      <Label layoutX="297.0" layoutY="131.0" text="Gudang">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="comboGudang" layoutX="362.0" layoutY="128.0" prefWidth="150.0" />
+      <Button fx:id="btnTambah" layoutX="717.0" layoutY="238.0" mnemonicParsing="false" onAction="#handleTambahClick" prefHeight="26.0" prefWidth="141.0" text="Tambah" />
+      <Label layoutX="388.0" layoutY="26.0" text="Form Penerimaan Barang">
+         <font>
+            <Font name="System Bold" size="22.0" />
+         </font>
+      </Label>
+      <TextField fx:id="textIdPenerimaan" layoutX="122.0" layoutY="35.0" promptText="Input No. Penerimaan" />
+      <TextField fx:id="textGetNamaGudang" editable="false" layoutX="520.0" layoutY="128.0" />
+      <TextField fx:id="textGetNamaAdmin" editable="false" layoutX="520.0" layoutY="162.0" />
+   </children>
+</Pane>
