@@ -40,16 +40,10 @@ public class Main extends Application {
         TableColumn<MasterModel, String> colName = new TableColumn<>("Name");
         colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 
-        TableColumn<MasterModel, String> colCategory = new TableColumn<>("Category");
-        colCategory.setCellValueFactory(cellData -> cellData.getValue().categoryProperty());
-
-        TableColumn<MasterModel, String> colPrice = new TableColumn<>("Price");
-        colPrice.setCellValueFactory(cellData -> cellData.getValue().priceProperty());
-
         TableColumn<MasterModel, String> colQuantity = new TableColumn<>("Quantity");
         colQuantity.setCellValueFactory(cellData -> cellData.getValue().quantityProperty());
 
-        tableView.getColumns().addAll(colId, colName, colCategory, colPrice, colQuantity);
+        tableView.getColumns().addAll(colId, colName, colQuantity);
         tableView.setItems(filteredData); // Gunakan FilteredList untuk tabel
 
         // Form Input
@@ -61,12 +55,6 @@ public class Main extends Application {
         TextField txtName = new TextField();
         txtName.setPromptText("Enter Name");
 
-        TextField txtCategory = new TextField();
-        txtCategory.setPromptText("Enter Category");
-
-        TextField txtPrice = new TextField();
-        txtPrice.setPromptText("Enter Price");
-
         TextField txtQuantity = new TextField();
         txtQuantity.setPromptText("Enter Quantity");
 
@@ -74,21 +62,17 @@ public class Main extends Application {
         btnAdd.setOnAction(e -> {
             String id = txtId.getText();
             String name = txtName.getText();
-            String category = txtCategory.getText();
-            String price = txtPrice.getText();
             String quantity = txtQuantity.getText();
 
-            if (!id.isEmpty() && !name.isEmpty() && !category.isEmpty() && !price.isEmpty() && !quantity.isEmpty()) {
+            if (!id.isEmpty() && !name.isEmpty() && !quantity.isEmpty()) {
                 // Add to list
-                data.add(new MasterModel(id, name, category, price, quantity));
+                data.add(new MasterModel(id, name, quantity));
 
                 // Add to database
-                insertDataToDatabase(id, name, category, price, quantity);
+                insertDataToDatabase(id, name, quantity);
 
                 txtId.clear();
                 txtName.clear();
-                txtCategory.clear();
-                txtPrice.clear();
                 txtQuantity.clear();
             }
         });
@@ -99,26 +83,20 @@ public class Main extends Application {
             if (selectedItem != null) {
                 String id = txtId.getText();
                 String name = txtName.getText();
-                String category = txtCategory.getText();
-                String price = txtPrice.getText();
                 String quantity = txtQuantity.getText();
 
                 // Update in database
-                updateDataInDatabase(selectedItem.getId(), id, name, category, price, quantity);
+                updateDataInDatabase(selectedItem.getId(), id, name, quantity);
 
                 // Update in table
                 selectedItem.setId(id);
                 selectedItem.setName(name);
-                selectedItem.setCategory(category);
-                selectedItem.setPrice(price);
                 selectedItem.setQuantity(quantity);
                 tableView.refresh();
 
                 // Clear form fields
                 txtId.clear();
                 txtName.clear();
-                txtCategory.clear();
-                txtPrice.clear();
                 txtQuantity.clear();
             }
         });
@@ -136,37 +114,32 @@ public class Main extends Application {
                 // Clear form fields
                 txtId.clear();
                 txtName.clear();
-                txtCategory.clear();
-                txtPrice.clear();
                 txtQuantity.clear();
             }
         });
 
-        form.getChildren().addAll(new Label("ID:"), txtId, new Label("Name:"), txtName, new Label("Category:"), txtCategory,
-                new Label("Price:"), txtPrice, new Label("Quantity:"), txtQuantity, btnAdd, btnEdit, btnDelete);
+        form.getChildren().addAll(new Label("ID:"), txtId, new Label("Name:"), txtName, new Label("Quantity:"), txtQuantity, btnAdd, btnEdit, btnDelete);
 
         // Add components to layout
         root.getChildren().addAll(new Label("Master Data - Service/Item/Obat"), form, tableView);
 
         // Scene and Stage setup
-        Scene scene = new Scene(root, 1000, 500);
+        Scene scene = new Scene(root, 800, 500);
         primaryStage.setTitle("Master Data");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     // Method to insert data into the database
-    private void insertDataToDatabase(String id, String name, String category, String price, String quantity) {
-        String query = "INSERT INTO master_data (id, name, category, price, quantity) VALUES (?, ?, ?, ?, ?)";
+    private void insertDataToDatabase(String id, String name, String quantity) {
+        String query = "INSERT INTO master_data (id, name, quantity) VALUES (?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, id);
             stmt.setString(2, name);
-            stmt.setString(3, category);
-            stmt.setString(4, price);
-            stmt.setString(5, quantity);
+            stmt.setString(3, quantity);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -176,18 +149,16 @@ public class Main extends Application {
     }
 
     // Method to update data in the database
-    private void updateDataInDatabase(String oldId, String id, String name, String category, String price, String quantity) {
-        String query = "UPDATE master_data SET id = ?, name = ?, category = ?, price = ?, quantity = ? WHERE id = ?";
+    private void updateDataInDatabase(String oldId, String id, String name, String quantity) {
+        String query = "UPDATE master_data SET id = ?, name = ?, quantity = ? WHERE id = ?";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, id);
             stmt.setString(2, name);
-            stmt.setString(3, category);
-            stmt.setString(4, price);
-            stmt.setString(5, quantity);
-            stmt.setString(6, oldId);
+            stmt.setString(3, quantity);
+            stmt.setString(4, oldId);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
