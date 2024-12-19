@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.26" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.18.0.v202411161754</property>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="4">
+            <list-property name="privateDriverProperties">
+                <ex-property>
+                    <name>contentBidiFormatStr</name>
+                    <value>ILYNN</value>
+                </ex-property>
+                <ex-property>
+                    <name>disabledContentBidiFormatStr</name>
+                </ex-property>
+                <ex-property>
+                    <name>disabledMetadataBidiFormatStr</name>
+                </ex-property>
+                <ex-property>
+                    <name>metadataBidiFormatStr</name>
+                    <value>ILYNN</value>
+                </ex-property>
+            </list-property>
+            <property name="odaDriverClass">com.mysql.cj.jdbc.Driver</property>
+            <property name="odaURL">jdbc:mysql://localhost:3306/pradita</property>
+            <property name="odaUser">jaki</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">amFraTEyM1oh</encrypted-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="Data Set" id="5">
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">user_id</property>
+                    <text-property name="displayName">user_id</text-property>
+                    <text-property name="heading">user_id</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">customer_name</property>
+                    <text-property name="displayName">customer_name</text-property>
+                    <text-property name="heading">customer_name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">total_purchase_amount</property>
+                    <text-property name="displayName">total_purchase_amount</text-property>
+                    <text-property name="heading">total_purchase_amount</text-property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">user_id</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">customer_name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">total_purchase_amount</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">user_id</property>
+                    <property name="nativeName">user_id</property>
+                    <property name="dataType">integer</property>
+                    <property name="nativeDataType">4</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">customer_name</property>
+                    <property name="nativeName">username</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">total_purchase_amount</property>
+                    <property name="nativeName">total_purchase_amount</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">3</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[SELECT 
+    u.user_id, 
+    u.username AS customer_name, 
+    SUM(t.total_price) AS total_purchase_amount
+FROM 
+    users u
+JOIN 
+    transactions t ON u.user_id = t.user_id
+GROUP BY 
+    u.user_id, u.username
+ORDER BY 
+    total_purchase_amount DESC
+LIMIT 10;]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>user_id</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>4</design:nativeDataTypeCode>
+            <design:precision>10</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>user_id</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>user_id</design:label>
+            <design:formattingHints>
+              <design:displaySize>10</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>username</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>50</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>customer_name</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>customer_name</design:label>
+            <design:formattingHints>
+              <design:displaySize>50</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>total_purchase_amount</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>3</design:nativeDataTypeCode>
+            <design:precision>32</design:precision>
+            <design:scale>2</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>total_purchase_amount</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>total_purchase_amount</design:label>
+            <design:formattingHints>
+              <design:displaySize>32</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+    </data-sets>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <page-footer>
+                <text id="3">
+                    <property name="contentType">html</property>
+                    <text-property name="content"><![CDATA[<value-of>new Date()</value-of>]]></text-property>
+                </text>
+            </page-footer>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <text id="28">
+            <property name="contentType">html</property>
+            <text-property name="content"><![CDATA[<h1 align="center">Data Pelanggan Paling Top</h1>
+<h2 align="center">Ikono Point of Sales</h2>]]></text-property>
+        </text>
+        <table id="29">
+            <property name="verticalAlign">middle</property>
+            <property name="width">7.947916666666667in</property>
+            <property name="dataSet">Data Set</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">user_id</property>
+                    <text-property name="displayName">user_id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["user_id"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">customer_name</property>
+                    <text-property name="displayName">customer_name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["customer_name"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">total_purchase_amount</property>
+                    <text-property name="displayName">total_purchase_amount</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["total_purchase_amount"]</expression>
+                    <property name="dataType">decimal</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <column id="48">
+                <property name="width">1.25in</property>
+            </column>
+            <column id="49">
+                <property name="width">4.052083333333333in</property>
+            </column>
+            <column id="50">
+                <property name="width">2.6458333333333335in</property>
+            </column>
+            <header>
+                <row id="30">
+                    <cell id="31">
+                        <label id="32">
+                            <property name="fontSize">12pt</property>
+                            <text-property name="text">ID Pelanggan</text-property>
+                        </label>
+                    </cell>
+                    <cell id="33">
+                        <label id="34">
+                            <property name="fontSize">12pt</property>
+                            <text-property name="text">Nama Pelanggan</text-property>
+                        </label>
+                    </cell>
+                    <cell id="35">
+                        <label id="36">
+                            <property name="fontSize">12pt</property>
+                            <text-property name="text">Total Pembelanjaan (Rp.)</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="37">
+                    <cell id="38">
+                        <data id="39">
+                            <property name="fontSize">12pt</property>
+                            <property name="textAlign">center</property>
+                            <property name="resultSetColumn">user_id</property>
+                        </data>
+                    </cell>
+                    <cell id="40">
+                        <data id="41">
+                            <property name="fontSize">12pt</property>
+                            <property name="textAlign">center</property>
+                            <property name="resultSetColumn">customer_name</property>
+                        </data>
+                    </cell>
+                    <cell id="42">
+                        <data id="43">
+                            <property name="fontSize">12pt</property>
+                            <property name="textAlign">center</property>
+                            <property name="resultSetColumn">total_purchase_amount</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="44">
+                    <cell id="45"/>
+                    <cell id="46"/>
+                    <cell id="47"/>
+                </row>
+            </footer>
+        </table>
+    </body>
+</report>
