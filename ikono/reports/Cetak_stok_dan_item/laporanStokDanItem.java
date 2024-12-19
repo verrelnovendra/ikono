@@ -23,6 +23,9 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Product Report");
 
+        // Label untuk laporan
+        Label reportLabel = new Label("Laporan Stok dan Item:");
+
         // TableView
         TableView<Product> tableView = new TableView<>();
 
@@ -90,7 +93,8 @@ public class Main extends Application {
         tableView.setItems(filteredData);
 
         // Layout
-        VBox vbox = new VBox(filters, tableView);
+        VBox vbox = new VBox(10, reportLabel, filters, tableView);
+        vbox.setPadding(new Insets(10));
 
         Scene scene = new Scene(vbox, 800, 600);
         primaryStage.setScene(scene);
