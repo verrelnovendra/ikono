@@ -25,6 +25,10 @@ public class PermissionManager {
         this.permissions = permissions;
     }
 
+    public void addPermissions(Map<String, List<String> permissions) {
+        this.permissions.putAll(permissions);
+    }
+
     public boolean hasPermission(String role, String permission) {
         List<String> permissions = this.permissions.get(role);
         if(permissions == null) return false;
